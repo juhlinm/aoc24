@@ -7,15 +7,10 @@ for l in lines:
 
 def is_safe(ln):
     o_asc = ln[1] > ln[0]
-    diff = abs(ln[1] - ln[0])
-    if diff < 1 or diff > 3:
-        return False
-    for i in range(1, len(ln) - 1):
+    for i in range(0, len(ln) - 1):
         asc = ln[i+1] > ln[i]
-        if asc != o_asc:
-            return False
         diff = abs(ln[i+1] - ln[i])
-        if diff < 1 or diff > 3:
+        if asc != o_asc or diff not in [1,2,3]:
             return False
     return True
 
