@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 with open("day6/inp.txt", "r") as f:
     lines = [line.strip() for line in f.readlines()]
 
@@ -9,25 +7,9 @@ ESCAPE = ((-1,-1), "escape")
 y_max = len(lines)
 x_max = len(lines[0])
 
-obs = [(x, y) for y, line in enumerate(lines) for x, c in enumerate(line) if c == "#"]
-obs_y = {
-    y: [x for x, c in enumerate(line) if c == "#"]
-    for y, line in enumerate(lines) 
-    if "#" in line
-}
-obs_x = {
-    x: [y for y, line in enumerate(lines) if x in [i for i, c in enumerate(line) if c == "#"]]
-    for x in range(x_max)
-}
+obs = sorted([(x, y) for y, line in enumerate(lines) for x, c in enumerate(line) if c == "#"])
 start = [(x, y) for y, line in enumerate(lines) for x, c in enumerate(line) if c == "^"][0]
 
-
-
-def can_move(n_pos):
-    if n_pos[1] in obs_y:
-        if n_pos[0] in obs_y[n_pos[1]]:
-            return False
-    return n_pos != n_o
 
 def get_dirs(c):
     if c == "^":
@@ -48,66 +30,64 @@ def get_dirs(c):
         n_c = "^"
     return x, y, n_c
 
-def move_to_next(pos, c):
+def move(pos, c, n_o):
     xk, yk = pos
     xd, yd, n_c = get_dirs(c)
+
     if xd == 0:
-        try:
-            l = deepcopy(obs_x[xk])
-            if n_o[0] == xk:
-                l.append(n_o[1])
-                l.sort()
-                if yd == -1:
-                    l.reverse()
-            n_yk = next((v for v in l if v * yd >= yk * yd))
-        except (KeyError, StopIteration):
+        yobs = [p[1] for p in obs if p[0] == xk]
+        yobs.append(yk)
+        if n_o[0] == xk:
+            yobs.append(n_o[1])
+        yobs.sort()
+        n_ind = yobs.index(yk) + yd
+        if n_ind >= len(yobs) or n_ind < 0:
             return ESCAPE
-        return (xk, n_yk - yd), n_c
+        n_y = yobs[n_ind] - yd
+        return (xk, n_y), n_c
     else:
-        try:
-            l = deepcopy(obs_y[yk])
-            if n_o[1] == yk:
-                l.append(n_o[0])
-                l.sort()
-                if xd == -1:
-                    l.reverse()
-            n_xk = next((v for v in l if v * xd >= xk * xd))
-        except (KeyError, StopIteration):
+        xobs = [p[0] for p in obs if p[1] == yk]
+        xobs.append(xk)
+        if n_o[1] == yk:
+            xobs.append(n_o[0])
+        xobs.sort()
+        n_ind = xobs.index(xk) + xd
+        if n_ind >= len(xobs) or n_ind < 0:
             return ESCAPE
-        return (n_xk - xd, yk), n_c
+        n_x = xobs[n_ind] - xd
+        return (n_x, yk), n_c
         
 
-
-def move(pos, c):
-    n_pos, n_c = move_to_next(pos, c)
-    if c == ESCAPE[1]:
-        return ESCAPE
-    elif (n_pos, n_c) not in passed:
-        passed.append((n_pos, n_c))
-        return n_pos, n_c
-    else:
-        return STOP
-
-
-
-n_os = 0
-n_esc = 0
+nnos = []
 for xk in range(0, x_max):
+    print(xk / x_max)
     for yk in range(0, y_max):
         n_o = (xk, yk)
+        if n_o in obs:
+            continue
 
-        cur_pos = start
-        c = "^"
-        passed = [(start, c)]
+        passed = [(start, "^")]
+        res = passed[0]
 
         while True:
-            cur_pos, c = move(cur_pos, c)
-
-            if c == STOP[1]:
-                n_os += 1
+            res = move(*res, n_o)
+            
+            if res in passed:
+                nnos.append(n_o)
                 break
-            elif c == ESCAPE[1]:
-                n_esc += 1
+            elif res == ESCAPE:
                 break
 
-print(n_os)
+            passed.append(res)
+
+print(len(nnos))
+
+with open("day6/out.txt", "w") as f:
+    o_lines = []
+    for y, line in enumerate(lines):
+        for x, c in enumerate(line):
+            if (x,y) in nnos:
+                line = line[:x] + 'O' + line[x+1:]
+        o_lines.append(line+"\n")
+    f.writelines(o_lines)
+
