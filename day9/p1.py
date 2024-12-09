@@ -1,53 +1,52 @@
 with open("day9/inp.txt", "r") as f:
     line = f.read().strip()
 
-DOT = "."
-
 vals = list(line[::2])
+vals_o = vals.copy()
 spcs = line[1::2]
-idxs = "".join([str(i) for i in range(len(vals))])
+idxs = [i for i in range(len(vals))]
 line_len = sum([int(i) for i in vals])
 
 
 def count_line(line):
     sum = 0
     for i, c in enumerate(line):
-        if c == DOT:
-            break
-        j = int(c)
-        sum += j * i
+        if c != "":
+            j = int(c)
+            sum += j * i
     return sum
 
 
 def build_value(idx):
-    return idxs[idx] * int(vals[idx])
-
+    if idx < len(vals) and vals[idx] == vals_o[idx]:
+        res = [str(idxs[idx])] * int(vals[idx])
+        vals[idx] = "0"
+        return res
+    else:
+        return []
+    
+def get_highest_v():
+    k = [i for i, x in enumerate(vals) if x != "0"]
+    if not k:
+        return ""
+    vals[k[-1]] = str(int(vals[k[-1]]) - 1)
+    return str(idxs[k[-1]])
 
 def fill_space(idx):
-    spc = spcs[idx]
-    _idx = len(vals) - idx - 1
-    v = idxs[_idx]
-    res = ""
-    while len(res) < int(spc):
-        if int(vals[_idx]) > 0:
-            res += v
-            vals[_idx] = str(int(vals[_idx]) - 1)
-        else:
-            _idx -= 1
-            v = idxs[_idx]
+    res = []
+    if idx < len(spcs):
+        spc = spcs[idx]
+        while len(res) < int(spc):
+            res.append(get_highest_v())
     return res
 
 
 def build_line():
-    i = 0
-    j = 0
-    line = ""
-    for _ in range(int(line_len / 4)):
-        line += build_value(i)
-        line += fill_space(j)
-        i += 1
-        j += 1
-    return line
+    nums = []
+    for i in range(int(line_len / 4)):
+        nums.extend(build_value(i))
+        nums.extend(fill_space(i))
+    return nums
 
-
-print(build_line())
+res = build_line()
+print(count_line(res))
