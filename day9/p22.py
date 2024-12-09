@@ -1,3 +1,5 @@
+from line_profiler import profile
+
 DOT = "."
 
 def count_line(line):
@@ -29,7 +31,7 @@ def get_highest_v():
     return v
 
 
-
+@profile
 def fill_space(nums, vals):
     v = get_highest_v()
     rep = None
@@ -44,19 +46,16 @@ def fill_space(nums, vals):
             if k <= int(spc):
                 f1 = False
                 f2 = False
-                jj = None
                 for i in range(len(nums)):
                     if not f1 and nums[i] == DOT and nums[i+int(spc)-1] == DOT:
                         kk = i
                         f1 = True
-                    # print(nums)
-                    # jj = nums.index(l)
                     if not f2 and nums[i] == l and nums[i+k-1] == l:
                         jj = i
                         f2 = True
                     if f1 and f2:
                         break
-                if jj and kk < jj:
+                if kk < jj:
                     rep = [l] * k
                     found = True
                     break
@@ -113,8 +112,8 @@ def defrag(line):
 line = open("day9/base.txt", "r").read().strip()
 assert defrag(line) == 2858
 
-# line = open("day9/base10.txt", "r").read().strip()
-# assert defrag(line) == 3127
+line = open("day9/base10.txt", "r").read().strip()
+assert defrag(line) == 3127
   
 line = open("day9/base420.txt", "r").read().strip()
 assert defrag(line) == 132
@@ -123,9 +122,9 @@ assert defrag(line) == 132
 
 
 
-with open("day9/inp.txt", "r") as f:
-    line = f.read().strip()
-print(defrag(line))
+# with open("day9/inp.txt", "r") as f:
+#     line = f.read().strip()
+# print(defrag(line))
 
 
 
