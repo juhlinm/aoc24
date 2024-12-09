@@ -1,3 +1,7 @@
+from line_profiler import profile
+import sys
+sys.setrecursionlimit(10**6)
+
 DOT = "."
 
 def count_line(line):
@@ -29,39 +33,40 @@ def get_highest_v():
     return v
 
 
-
+# @profile
 def fill_space(nums, vals):
     v = get_highest_v()
     rep = None
     found = False
-    while v != 0 and not found:
+    while v != 0:
         k = int(vals[v])
         l = str(idxs[v])
+
+        # jj = None
+        # print(nums)
+        # jj = nums.index(l)
+        for i in range(len(nums)):
+            if nums[i] == l and nums[i+k-1] == l:
+                jj = i
+                break
+
         if l in reps_x:
             v = get_highest_v()
             continue
         for idx, spc in enumerate(spcs):
             if k <= int(spc):
-                f1 = False
-                f2 = False
-                jj = None
                 for i in range(len(nums)):
-                    if not f1 and nums[i] == DOT and nums[i+int(spc)-1] == DOT:
+                    if nums[i] == DOT and nums[i+int(spc)-1] == DOT:
                         kk = i
-                        f1 = True
-                    # print(nums)
-                    # jj = nums.index(l)
-                    if not f2 and nums[i] == l and nums[i+k-1] == l:
-                        jj = i
-                        f2 = True
-                    if f1 and f2:
-                        break
+                        break 
                 if jj and kk < jj:
                     rep = [l] * k
                     found = True
                     break
         else:
             v = get_highest_v()
+        if found:
+            break
     
     if rep:
         for klp in range(k):
@@ -93,7 +98,7 @@ def defrag(line):
         nums.extend(build_value(i, vals))
         i += 1
 
-    # print("".join(nums))
+    print("".join(nums))
 
     o_nums = ["-1"]
     op = 0
@@ -101,7 +106,7 @@ def defrag(line):
         high = len(vals) - 1
         o_nums = nums.copy()
         nums, xp = fill_space(nums, vals)
-        # print("".join(nums))
+        print("".join(nums))
         # print(nums)
         if op % 500 == 0:
             print(xp)
@@ -113,8 +118,8 @@ def defrag(line):
 line = open("day9/base.txt", "r").read().strip()
 assert defrag(line) == 2858
 
-# line = open("day9/base10.txt", "r").read().strip()
-# assert defrag(line) == 3127
+line = open("day9/base10.txt", "r").read().strip()
+print(defrag(line))
   
 line = open("day9/base420.txt", "r").read().strip()
 assert defrag(line) == 132
@@ -123,9 +128,9 @@ assert defrag(line) == 132
 
 
 
-with open("day9/inp.txt", "r") as f:
-    line = f.read().strip()
-print(defrag(line))
+# with open("day9/inp.txt", "r") as f:
+#     line = f.read().strip()
+# print(defrag(line))
 
 
 
