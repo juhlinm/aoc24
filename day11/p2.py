@@ -1,4 +1,5 @@
 import sys
+from functools import cache
 
 sys.setrecursionlimit(10**6)
 
@@ -11,31 +12,27 @@ def split_integer(num, c):
     return int(str(num)[: c // 2]), int(str(num)[c // 2 :])
 
 
-def rool(inp):
+    
+
+@cache
+def rool(inp, max_depth, depth = 0):
+    if depth == max_depth:
+
+        return 1
+    n_depth = depth + 1
     if inp == 0:
-        return [1]
+        return rool(1, max_depth, n_depth)
     else:
         c = len(str(inp))
         if c % 2 == 0:
             x, y = split_integer(inp, c)
-            return [x, y]
-        else:
-            return [inp * 2024]
+            return rool(x, max_depth, n_depth) + rool(y, max_depth, n_depth)
+        return rool(inp * 2024, max_depth, n_depth)
+
 
 
 def solve(prob, iter):
-    trans = {}
-    for i in range(iter):
-        o_prob = prob.copy()
-        prob = []
-        for x in o_prob:
-            if x in trans:
-                prob.extend(trans[x])
-            else:
-                r = rool(x)
-                trans[x] = r
-                prob.extend(r)
-    return len(prob)
+    return sum(rool(x, iter) for x in prob)
 
 
 print(solve(seven, 1), 7)
