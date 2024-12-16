@@ -3,6 +3,9 @@ from functools import cache
 inp = open("day16/inp.txt", "r").readlines()
 inp_11048 = open("day16/inp_11048.txt", "r").readlines()
 inp_7036 = open("day16/inp_7036.txt", "r").readlines()
+inp_21148 = open("day16/inp_21148.txt", "r").readlines()
+inp_4013 = open("day16/inp_4013.txt", "r").readlines()
+inp_5078 = open("day16/inp_5078.txt", "r").readlines()
 
 @cache
 def find_paths(walls, end, walked, rotated, pos, dir):
@@ -65,4 +68,7 @@ def solve(prob):
 
 print(solve(inp_7036), 7036)
 print(solve(inp_11048), 11048)
-print(solve(inp))
+print(solve(inp_21148), 21148)
+print(solve(inp_4013), 4013)
+print(solve(inp_5078), 5078)
+# print(solve(inp))
