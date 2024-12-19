@@ -17,6 +17,50 @@ def sorter(towel):
     return s
 
 
+# def viable(fills, max, i=0):
+#     if i == max:
+#         return True
+
+#     a = [x for x in fills if x[0] == i]
+#     ret = False
+#     for k in a:
+#         if viable(fills, max, k[1] + 1):
+#             ret = True
+#     return ret
+
+
+def viable(tuples_list, end):
+    from collections import defaultdict
+
+    start = 0
+
+    # Build a graph from the tuples
+    graph = defaultdict(list)
+    for a, b in tuples_list:
+        for k in range(a, b + 1):
+            graph[k].append(k + 1)
+
+    # Perform DFS to find a valid path
+    visited = set()
+
+    def dfs(node):
+        if node in visited:
+            return False
+        visited.add(node)
+        if node == end:
+            return True
+        for neighbor in graph[node]:
+            if dfs(neighbor):
+                return True
+        visited.remove(node)  # Backtrack
+        return False
+
+    # Ensure all numbers in the range are visited
+    if dfs(start):
+        return set(range(start, end + 1)).issubset(visited)
+    return False
+
+
 def solve(prob):
     towels, patterns = prob
     towels = sorted([x.strip() for x in towels.split(",")], key=lambda x: sorter(x), reverse=True)
@@ -28,28 +72,34 @@ def solve(prob):
     #     tows[l] = [len(tow) == l for tow in towels]
 
     s = 0
-    for pattern in patterns:
-        o_pattern = pattern
+    for kk, pattern in enumerate(patterns):
+        print(kk / len(patterns))
+        # o_pattern = pattern
         # used_towels = []
-        fills2 = {towel: [] for towel in towels}
-        fills = set()
+        # fills2 = {towel: [] for towel in towels}
+        # fills = set()
+        fills3 = []
         for towel in towels:
             idxs = get_idxs(towel, pattern)
             for idx in idxs:
-                fills.add(idx)
-                for k in range(len(towel)):
-                    fills.add(idx + k)
-                fills2[towel].append((idx, idx + len(towel) - 1))
+                # fills.add(idx)
+                # for k in range(len(towel)):
+                #     fills.add(idx + k)
+                # fills2[towel].append((idx, idx + len(towel) - 1))
+                fills3.append((idx, idx + len(towel) - 1))
 
         # print(fills)
         # print(fills2)
         # print(len(pattern))
-        if all(i in fills for i in range(len(pattern))):
-            print(fills)
-            print({k: v for k, v in fills2.items() if len(v)})
-            print(len(pattern))
-            print(pattern)
-            print("----")
+        # fills3 = v for v in fills2.values()]
+        # print(fills3)
+        print(pattern)
+        if viable(fills3, len(pattern)):
+            # print(fills)
+            # print({k: v for k, v in fills2.items() if len(v)})
+            # print(len(pattern))
+            # print(pattern)
+            # print("----")
             s += 1
         else:
             # print(o_pattern)
