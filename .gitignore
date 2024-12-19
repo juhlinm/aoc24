@@ -1,3 +1,4 @@
 uv.exe
 .venv
 *.txt
+.vscode
