@@ -2,3 +2,4 @@ uv.exe
 .venv
 *.txt
 .vscode
+pypy/

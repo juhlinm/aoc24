@@ -65,15 +65,13 @@ def find_cheats(prob):
             else:
                 track[(x, y)] = 1
     o_length = find_len(track, start, end, len(prob), len(prob[0]))
-    o_track = track.copy()
     cheats = []
 
     walls = [k for k in track.keys() if is_valid_wall(k, track)]
     for wall in walls:
         track[wall] = 0
         length = find_len(track, start, end, len(prob), len(prob[0]))
-        if length:
-            cheats.append(o_length - length)
+        cheats.append(o_length - length)
         track[wall] = 1
     return cheats
 
