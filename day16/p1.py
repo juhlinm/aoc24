@@ -4,7 +4,8 @@ inp_7036 = open("day16/inp_7036.txt", "r").readlines()
 inp_21148 = open("day16/inp_21148.txt", "r").readlines()
 inp_4013 = open("day16/inp_4013.txt", "r").readlines()
 inp_5078 = open("day16/inp_5078.txt", "r").readlines()
-inp_1004 = open("day16/inp_1004.txt", "r").readlines() 
+inp_1004 = open("day16/inp_1004.txt", "r").readlines()
+
 
 def get_paths(unexplored, explore):
     paths = []
@@ -14,12 +15,14 @@ def get_paths(unexplored, explore):
             paths.append((n_pos, dir))
     return paths
 
+
 def minimum(unexplored):
     min_key = list(unexplored.keys())[0]
     for i in list(unexplored.keys())[1:]:
         if unexplored[i][0] < unexplored[min_key][0]:
             min_key = i
     return min_key
+
 
 def solve(prob):
     walls = []
@@ -49,7 +52,7 @@ def solve(prob):
             dir = unexplored[explore][1]
             for path, n_dir in get_paths(unexplored, explore):
                 s = 1
-                if abs(dir-n_dir) in [1,3]:
+                if abs(dir - n_dir) in [1, 3]:
                     s += 1000
                 time = unexplored[explore][0] + s
                 if time < unexplored[path][0]:
@@ -57,6 +60,7 @@ def solve(prob):
         del unexplored[explore]
 
     return unexplored[explore][0]
+
 
 print(solve(inp_7036), 7036)
 print(solve(inp_11048), 11048)
