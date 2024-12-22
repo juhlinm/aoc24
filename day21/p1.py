@@ -26,7 +26,7 @@ def is_disallowed(a, moves, disallow):
     return False
 
 
-def walk_manhattan(a, b, prev_end, disallow=(0, 0)):
+def walk_manhattan(a, b, disallow=(0, 0)):
     x = b[0] - a[0]
     y = b[1] - a[1]
 
@@ -42,8 +42,6 @@ def walk_manhattan(a, b, prev_end, disallow=(0, 0)):
 
     if not moves:
         return ""
-
-    prev_end = int(prev_end[-1]) if len(prev_end) else None
 
     max_score = -1e6
     best_perm = tuple()
@@ -89,32 +87,27 @@ def pad_to_dir(inp):
         "A": (2, 3),
     }
     inp = "A" + inp
-    prev_walk = ""
     for i in range(len(inp) - 1):
-        walk = walk_manhattan(pad[inp[i]], pad[inp[i + 1]], prev_walk, (0, 3))
+        walk = walk_manhattan(pad[inp[i]], pad[inp[i + 1]], (0, 3))
         ret += num_to_dir_str(walk)
-        prev_walk = walk
     return ret
 
 
 def dir_to_dir(inp):
     ret = ""
     inp = "A" + inp
-    prev_walk = ""
     for i in range(len(inp) - 1):
-        walk = walk_manhattan(dir[inp[i]], dir[inp[i + 1]], prev_walk)
+        walk = walk_manhattan(dir[inp[i]], dir[inp[i + 1]])
         ret += num_to_dir_str(walk)
-        prev_walk = walk
     return ret
 
 
 def dir_to_length(inp):
-    ret = ""
+    s = 0
     inp = "A" + inp
     for i in range(len(inp) - 1):
-        walk = walk_manhattan(dir[inp[i]], dir[inp[i + 1]], "5")
-        ret += num_to_dir_str(walk)
-    return len(ret)
+        s += manhattan(dir[inp[i]], dir[inp[i + 1]])
+    return s + len(inp) - 1
 
 
 def length(inp):
