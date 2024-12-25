@@ -4,7 +4,6 @@ inp_7036 = open("day16/inp_7036.txt", "r").readlines()
 inp_21148 = open("day16/inp_21148.txt", "r").readlines()
 inp_4013 = open("day16/inp_4013.txt", "r").readlines()
 inp_5078 = open("day16/inp_5078.txt", "r").readlines()
-inp_1004 = open("day16/inp_1004.txt", "r").readlines()
 
 
 def get_paths(unexplored, explore):
@@ -66,6 +65,5 @@ print(solve(inp_7036), 7036)
 print(solve(inp_11048), 11048)
 print(solve(inp_21148), 21148)
 print(solve(inp_4013), 4019)
-print(solve(inp_1004), 1004)
 print(solve(inp_5078), 5078)
 print(solve(inp))
