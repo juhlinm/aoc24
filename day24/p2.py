@@ -1,5 +1,40 @@
 inp = open("day24/inp.txt", "r").read().split("\n\n")
-inp_p2 = open("day24/inp_p2.txt", "r").read().split("\n\n")
+
+OPERATORS = ["AND", "OR", "XOR"]
+
+
+class Operation:
+    a: str
+    b: str
+    op: int
+    res: str
+
+    def __init__(self, a: str, op: int, b: str, res: str) -> None:
+        self.a = a
+        self.op = op
+        self.b = b
+        self.res = res
+
+    def __eq__(self, other: object) -> bool:
+        nums = (self.a == other.a and self.b == other.b) or (
+            self.a == other.b and self.b == other.a
+        )
+        return nums and self.op == other.op
+
+    def __repr__(self) -> str:
+        return f"{self.a} {OPERATORS[self.op]} {self.b} -> {self.res}"
+
+    def is_xy(self) -> bool:
+        return self.a.startswith(("x", "y")) and self.b.startswith(("x", "y"))
+
+    def half_eq(self, other: object) -> bool:
+        nums = (
+            (self.a == other.a and self.b != other.b)
+            or (self.a == other.b and self.b != other.a)
+            or (self.a != other.a and self.b == other.b)
+            or (self.a != other.b and self.b == other.a)
+        )
+        return nums and self.op == other.op
 
 
 def get_value(vals, key):
@@ -12,41 +47,135 @@ def get_value(vals, key):
     return int(val, 2)
 
 
-def get_n_values(vals, key):
-    return len([k for k in vals.keys() if k.startswith(key)])
-
-
-def action(vals, op):
-    a, act, b, res = op
-    a = vals[a]
-    b = vals[b]
-    if act == 0:
-        vals[res] = a and b
-    elif act == 1:
-        vals[res] = a or b
-    elif act == 2:
-        vals[res] = a != b
+def action(vals, o):
+    a = vals[o.a]
+    b = vals[o.b]
+    if o.op == 0:
+        vals[o.res] = a and b
+    elif o.op == 1:
+        vals[o.res] = a or b
+    elif o.op == 2:
+        vals[o.res] = a != b
 
 
 def sorter(vals, ops):
     n_ops = []
-    avail = [op for op in ops if op[0] in vals and op[2] in vals]
+    avail = [op for op in ops if op.a in vals and op.b in vals]
     n_ops.extend(avail)
 
-    avail_res = [op[3] for op in avail]
+    avail_res = [op.res for op in avail]
     stack = [op for op in ops if op not in avail]
 
     while len(stack):
-        a, _, b, res = stack[-1]
+        c_o = stack[-1]
 
-        if (a in vals and b in avail_res) or (b in vals and a in avail_res):
+        if (c_o.a in vals and c_o.b in avail_res) or (
+            c_o.b in vals and c_o.a in avail_res
+        ):
             n_ops.append(stack.pop())
-        elif a in avail_res and b in avail_res:
+        elif c_o.a in avail_res and c_o.b in avail_res:
             n_ops.append(stack.pop())
-            avail_res.append(res)
+            avail_res.append(c_o.res)
         else:
             stack = stack[-1:] + stack[:-1]
     return n_ops
+
+
+def secret_op(vals, ops):
+    wanted_ops = []
+    wanted_ops.append(Operation("x00", 2, "y00", "z00"))
+    wanted_ops.append(Operation("x00", 0, "y00", "B00"))
+
+    length = (len(ops) - 2) // 5
+    for i in range(length):
+        n = str(i + 1).zfill(2)
+        x = "x" + n
+        y = "y" + n
+        A = "A" + n
+        C = "C" + n
+        wanted_ops.append(Operation(x, 2, y, A))
+        wanted_ops.append(Operation(x, 0, y, C))
+
+    for i in range(length):
+        n = str(i + 1).zfill(2)
+        z = "z" + n
+        z_plus = "z" + str(i + 2).zfill(2)
+        A = "A" + n
+        B = "B" + n
+        B_last = "B" + str(i).zfill(2)
+        C = "C" + n
+        D = "D" + n
+        wanted_ops.append(Operation(A, 2, B_last, z))
+        wanted_ops.append(Operation(A, 0, B_last, D))
+        if i != length - 1:
+            wanted_ops.append(Operation(C, 1, D, B))
+        else:
+            wanted_ops.append(Operation(C, 1, D, z_plus))
+
+    os = ops.copy()
+    switcheroon = {}
+    switcherone = {}
+    xy_list = [w for w in wanted_ops if w.is_xy()]
+    for wanted_op in xy_list:
+        for op in os:
+            if wanted_op == op:
+                switcheroon[wanted_op.res] = op
+                switcherone[op.res] = wanted_op
+                break
+
+    non_xy = [w for w in wanted_ops if not w.is_xy()]
+    for wanted_op in non_xy:
+        temp_op = Operation(
+            switcheroon[wanted_op.a].res, wanted_op.op, switcheroon[wanted_op.b].res, ""
+        )
+        for op in os:
+            if temp_op == op:
+                switcheroon[wanted_op.res] = op
+                switcherone[op.res] = wanted_op
+                break
+        else:
+            for op in ops:
+                if temp_op.half_eq(op):
+                    switcheroon[wanted_op.res] = op
+                    switcherone[op.res] = wanted_op
+                    break
+
+    switched = set()
+    for k, v in switcheroon.items():
+        if k.startswith("z"):
+            if not v.res.startswith("z"):
+                switched.add(k)
+                switched.add(v.res)
+            if k not in ["z00", "z45"]:
+                idx = int(k[1:])
+                A = "A" + str(idx).zfill(2)
+                B = "B" + str(idx - 1).zfill(2)
+                s_A = switcheroon[A].res
+                s_B = switcheroon[B].res
+                source = [s_A, s_B]
+                if v.a not in source or v.b not in source:
+                    if not v.a == s_A and not v.b == s_A:
+                        switched.add(s_A)
+                        if not v.a in source:
+                            switched.add(v.a)
+                        else:
+                            switched.add(v.b)
+                    if not v.a == s_A and not v.b == s_B:
+                        switched.add(s_B)
+                        if not v.a in source:
+                            switched.add(v.a)
+                        else:
+                            switched.add(v.b)
+        if k.startswith("A"):
+            if not v.op == 2 or not v.is_xy():
+                switched.add(k)
+                switched.add(v.res)
+        if k.startswith("C"):
+            if not v.op == 0 or not v.is_xy():
+                switched.add(k)
+                switched.add(v.res)
+
+    return wanted_ops, ",".join(sorted(list(switched)))
 
 
 def solve(prob):
@@ -55,14 +184,15 @@ def solve(prob):
         line.split(": ")[0]: bool(int(line.split(": ")[1])) for line in init.split("\n")
     }
     ops = []
-    operators = ["AND", "OR", "XOR"]
+
     for line in ops_raw.split("\n"):
         split = line.split()
-        ops.append((split[0], operators.index(split[1]), split[2], split[4]))
+        ops.append(Operation(split[0], OPERATORS.index(split[1]), split[2], split[4]))
 
+    ops, ret = secret_op(vals, ops)
     ops = sorter(vals, ops)
-    x = get_value(vals, "x")
 
+    x = get_value(vals, "x")
     y = get_value(vals, "y")
 
     s = x + y
@@ -70,24 +200,9 @@ def solve(prob):
     for op in ops:
         action(vals, op)
 
-    n_z = get_n_values(vals, "z")
-    bin_s = bin(s)[-n_z:]
-    bin_x = bin(x)[-n_z:]
-    bin_y = bin(y)[-n_z:]
-
-    # loop over len z
-    # if len x < len_z  --> first element 1 if both 1 first x,y
-
-    incorrect = []
-    for k in range(len(bin_s) - 1, -1, -1):
-        key = "z" + str(k).zfill(2)
-        if vals[key] != bool(bin_s[-(k + 1)]):
-            incorrect.append(key)
-
-    r = get_value(vals, "z")
-    bin_r = bin(r)[2:].zfill(n_z)
-    return r
+    z = get_value(vals, "z")
+    print(f"{z}\n{s}")
+    return ret
 
 
-print(solve(inp_p2), "z00,z01,z02,z05")
-# print(solve(inp))
+print(solve(inp))
