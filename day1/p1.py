@@ -1,18 +1,12 @@
-with open("day1/inp.txt", "r") as f:
-    lines = f.readlines()
-
-l1 = []
-l2 = []
-for l in lines:
-    l = l.strip()
-    l1.append(int(l.split(" ")[0]))
-    l2.append(int(l.split(" ")[-1]))
-
-l1 = sorted(l1)
-l2 = sorted(l2)
-
-sum = 0
-for x, y in zip(l1, l2):
-    sum += abs(x-y)
-
-print(sum)
+inp = [l.strip().split() for l in open("day1/inp.txt", "r").readlines()]
+print(
+    sum(
+        [
+            abs(x - y)
+            for x, y in zip(
+                sorted([int(split[0]) for split in inp]),
+                sorted([int(split[-1]) for split in inp]),
+            )
+        ]
+    )
+)
